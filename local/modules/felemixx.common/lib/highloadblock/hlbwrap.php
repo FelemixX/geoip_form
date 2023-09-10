@@ -23,7 +23,7 @@ class HlbWrap
     /**
      * @return string
      */
-    public function getEntityName(): string
+    public function getEntityName()
     {
         return $this->entityName;
     }
@@ -32,7 +32,7 @@ class HlbWrap
      * @return int
      * @throws \Bitrix\Main\LoaderException
      */
-    public function getHlbId(): int
+    public function getHlbId()
     {
         if (Loader::includeModule('highloadblock')) {
             $arHlBlock = $this->getHlbInfo();
@@ -47,7 +47,7 @@ class HlbWrap
      * @return \Bitrix\Main\DB\Result
      * @throws \Bitrix\Main\ArgumentException
      */
-    public function getList(array $parameters = []): \Bitrix\Main\DB\Result
+    public function getList(array $parameters = [])
     {
         $class = static::getClass();
 
@@ -70,7 +70,7 @@ class HlbWrap
      * @return \Bitrix\Main\Entity\AddResult
      * @throws \Exception
      */
-    public function add(array $data): \Bitrix\Main\Entity\AddResult
+    public function add(array $data)
     {
         $class = static::getClass();
 
@@ -82,7 +82,7 @@ class HlbWrap
      * @param array $data
      * @return \Bitrix\Main\Entity\UpdateResult
      */
-    public function update(mixed $primary, array $data): \Bitrix\Main\Entity\UpdateResult
+    public function update(mixed $primary, array $data)
     {
         $class = static::getClass();
 
@@ -93,7 +93,7 @@ class HlbWrap
      * @param mixed $primary
      * @return \Bitrix\Main\Entity\DeleteResult
      */
-    public function delete(mixed $primary): \Bitrix\Main\Entity\DeleteResult
+    public function delete(mixed $primary)
     {
         $class = static::getClass();
 
@@ -105,7 +105,7 @@ class HlbWrap
      * @throws \Bitrix\Main\LoaderException
      * @throws \Bitrix\Main\SystemException
      */
-    public function getClass(): ?\Bitrix\Main\Entity\DataManager
+    public function getClass()
     {
         if (Loader::includeModule('highloadblock')) {
             $arHLBlock = $this->getHlbInfo();
@@ -121,7 +121,7 @@ class HlbWrap
      * @throws \Bitrix\Main\ArgumentException
      * @throws \Bitrix\Main\LoaderException
      */
-    protected function getHlbInfo(): array
+    protected function getHlbInfo()
     {
         if (Loader::includeModule('highloadblock')) {
             return HighloadBlockTable::getList([

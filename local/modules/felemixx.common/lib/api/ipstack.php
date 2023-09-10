@@ -30,7 +30,7 @@ class IpStack
 
     protected static function makeRequest(string $ip): false|string
     {
-        if (!preg_match(static::getIpRegExp(), $ip)) {
+        if (!static::checkIfIpIsValid($ip)) {
             return false;
         }
 
@@ -40,11 +40,15 @@ class IpStack
         $uri->addParams([
                 'access_key ' => static::API_KEY,
             ],
-            true
         );
 
         $httpClient = new \Bitrix\Main\Web\HttpClient();
 
-        return $httpClient->get(str_replace('%20', '', $uri->getUri()));
+        return $httpClient->get(str_replace('%20', '', $uri->getUri())); //Битрикс добавляет параметру лишний пробел xD
+    }
+
+    public static function checkIfIpIsValid(string $ip): bool
+    {
+        return is_int(preg_match(static::getIpRegExp(), $ip));
     }
 }

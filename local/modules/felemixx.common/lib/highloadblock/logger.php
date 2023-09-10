@@ -25,6 +25,7 @@ class Logger
         ];
 
         try {
+            echo '<script>console.log(' . \CUtil::PhpToJsObject($insertData) . ');</script>'; //TODO: DELETE IV_LOGGING
             $hlb->add($insertData);
 
             return true;

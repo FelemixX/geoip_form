@@ -15,7 +15,6 @@ class GeoIpSearchForm
     {
         $hlb = new HlbWrap(static::getHlbName());
         $result = [];
-
         try {
             $query = $hlb->getList(
                 $parameters
@@ -24,7 +23,6 @@ class GeoIpSearchForm
             while ($fetch = $query->fetch()) {
                 $result[] = $fetch;
             }
-
             return $result;
         } catch (\Throwable $exception) {
             Logger::addLog($exception);
