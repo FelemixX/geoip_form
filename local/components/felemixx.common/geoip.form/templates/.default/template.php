@@ -3,19 +3,11 @@ if(!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED !== true) die();
 
 use Bitrix\Main\Page\Asset;
 use Bitrix\Main\Localization\Loc;
-use Bitrix\Main\UI\Extension;
 
 //Для экономии времени при выполнении тестового задания. Правильно - шапке такое размещать
 $asset = Asset::getInstance();
 $asset->addJs('https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js');
 $asset->addCss('https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css');
-
-$extensions = [
-    'felemixx.geoipform',
-    'ajax',
-    'ui.hint'
-];
-Extension::load($extensions);
 ?>
 <form class="needs-validation" id="geoip-form">
     <div class="mb-3 text-danger d-none warn-message"><?= Loc::getMessage('INVALID_INPUT') ?></div>
