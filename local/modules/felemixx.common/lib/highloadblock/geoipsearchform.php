@@ -23,6 +23,7 @@ class GeoIpSearchForm
             while ($fetch = $query->fetch()) {
                 $result[] = $fetch;
             }
+
             return $result;
         } catch (\Throwable $exception) {
             Logger::addLog($exception);

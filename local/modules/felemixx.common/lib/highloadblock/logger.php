@@ -25,7 +25,6 @@ class Logger
         ];
 
         try {
-            echo '<script>console.log(' . \CUtil::PhpToJsObject($insertData) . ');</script>';
             $hlb->add($insertData);
 
             return true;

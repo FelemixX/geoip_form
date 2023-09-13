@@ -38,13 +38,13 @@ class IpStack
 
         $uri->setPath("/$ip/");
         $uri->addParams([
-                'access_key ' => static::API_KEY,
+                'access_key' => static::API_KEY,
             ],
         );
 
         $httpClient = new \Bitrix\Main\Web\HttpClient();
 
-        return $httpClient->get(str_replace('%20', '', $uri->getUri())); //Битрикс добавляет параметру лишний пробел xD
+        return $httpClient->get($uri->getUri());
     }
 
     public static function checkIfIpIsValid(string $ip): bool
