@@ -18,20 +18,22 @@ export class Geoipform {
 
         if (!inputValue.match(this.ipRegexp)) {
             BX.removeClass(this.warnMessage, 'd-none');
-            return;
         } else {
             BX.addClass(this.warnMessage, 'd-none');
-
+            this.sendRequest(inputValue);
         }
     }
 
     sendRequest(userIp) {
-        BX.runComponentAction(
-            'felemixx:geopip.form',
-            'processFormDataAction',
+        BX.ajax.runComponentAction(
+            'felemixx.common:geoip.form',
+            'processFormData',
             {
                 mode: 'class',
-                data: userIp,
+                data: {
+                    userIp: userIp,
+                },
+
             }
         ).then(res => {
             if (res.data.success) {

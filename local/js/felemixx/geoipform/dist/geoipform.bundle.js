@@ -24,18 +24,20 @@ this.BX = this.BX || {};
           var inputValue = this.input.value;
           if (!inputValue.match(this.ipRegexp)) {
             BX.removeClass(this.warnMessage, 'd-none');
-            return;
           } else {
             BX.addClass(this.warnMessage, 'd-none');
+            this.sendRequest(inputValue);
           }
         }
       }, {
         key: "sendRequest",
         value: function sendRequest(userIp) {
           var _this = this;
-          BX.runComponentAction('felemixx:geopip.form', 'processFormDataAction', {
+          BX.ajax.runComponentAction('felemixx.common:geoip.form', 'processFormData', {
             mode: 'class',
-            data: userIp
+            data: {
+              userIp: userIp
+            }
           }).then(function (res) {
             if (res.data.success) {
               _this.onSuccess(res.data.html);
