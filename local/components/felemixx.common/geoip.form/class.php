@@ -12,16 +12,13 @@ class GeoIpForm extends CBitrixComponent implements Controllerable
     public function configureActions()
     {
         return [
-            'createResponseTable' => [
-                'prefilters' => [],
-            ],
             'processFormData' => [
                 'prefilters' => [],
             ]
         ];
     }
 
-    public function createResponseTableAction(array $data): string
+    protected static function createResponseTable(array $data): string
     {
         $responseFieldName = Loc::getMessage('RESPONSE_FIELD');
         $responseValueFieldName = Loc::getMessage('RESPONSE_FIELD_VALUE');
@@ -47,18 +44,52 @@ class GeoIpForm extends CBitrixComponent implements Controllerable
         return $html;
     }
 
-    public function processFormDataAction($userIp): array
+    public function processFormDataAction(string $userIp): array
     {
         $result = [
             'success' => false,
             'message' => 'Something went wrong'
         ];
-        $userIp = htmlspecialchars(trim($userIp));
+        try {
+            $userIp = htmlspecialchars(trim($userIp));
 
-        if (!\Felemixx\Common\Api\IpStack::checkIfIpIsValid($userIp)) {
-            return $result;
+            if (!\Felemixx\Common\Api\IpStack::checkIfIpIsValid($userIp)) {
+                return $result;
+            }
+
+            if (static::checkIfExists($userIp)) {
+                $info = static::getInfoByIp($userIp);
+                $result = [
+                    'success' => true,
+                    'html' => static::createResponseTable($info),
+                ];
+
+                return $result;
+            }
+
+            $requestData = \Felemixx\Common\Api\IpStack::getByIp($userIp);
+            if (!$requestData) {
+                return $result;
+            }
+
+            $decoded = json_decode($requestData, true);
+            if (in_array('error', $decoded)) {
+                return $result;
+            }
+
+            $result = [
+                'success' => true,
+                'html' => static::createResponseTable($decoded),
+            ];
+        } catch (\Throwable $exception) {
+            Logger::addLog($exception);
         }
 
+        return $result;
+    }
+
+    protected static function checkIfExists(string $userIp): bool
+    {
         $select = GeoIpSearchForm::select(
             [
                 'select' => [
@@ -66,38 +97,36 @@ class GeoIpForm extends CBitrixComponent implements Controllerable
                     'UF_API_RESPONSE',
                 ],
                 'filter' => [
-                    '=UF_IP_ADDRESS'
+                    '=UF_IP_ADDRESS' => $userIp,
                 ],
                 'limit' => 1,
+                'runtime' => [
+                    new ORM\Fields\ExpressionField('CNT', 'COUNT(*)')
+                ],
+                "cache" => ["ttl" => 3600],
             ]
         );
 
-        if (!empty($select)) {
-            $result = [
-                'message' => '',
-                'html' => static::createResponseTableAction($select[0]),
-            ];
+        return $select[0] != 0;
+    }
 
-            return $result;
-        }
+    protected static function getInfoByIp(string $userIp): array
+    {
+        $select = GeoIpSearchForm::select(
+            [
+                'select' => [
+                    'UF_IP_ADDRESS',
+                    'UF_API_RESPONSE',
+                ],
+                'filter' => [
+                    '=UF_IP_ADDRESS' => $userIp,
+                ],
+                'limit' => 1,
+                "cache" => ["ttl" => 3600],
+            ]
+        );
 
-        $requestData = \Felemixx\Common\Api\IpStack::getByIp($userIp);
-        if (!$requestData) {
-            return $result;
-        }
-
-
-        $decoded = json_decode($requestData, true);
-        if (in_array('error', $decoded)) {
-            return $result;
-        }
-
-        $result = [
-            'success' => true,
-            'html' => static::createResponseTableAction($decoded),
-        ];
-
-        return $result;
+        return $select[0];
     }
 
     public function executeComponent()
