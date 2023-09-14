@@ -4,6 +4,7 @@ export class Geoipform {
         this.input = BX('geoip-form-input');
         this.ipRegexp = new RegExp('^((25[0-5]|(2[0-4]|1\\d|[1-9]|)\\d)\\.?\\b){4}$');
         this.warnMessage = this.form.querySelector('div.warn-message');
+        this.errorMessage = this.form.querySelector('div.error-message');
         this.initHandlers();
     }
 
@@ -17,9 +18,9 @@ export class Geoipform {
         const inputValue = this.input.value;
 
         if (!this.ipRegexp.test(inputValue)) {
-            BX.addClass(this.warnMessage, 'd-none');
-        } else {
             BX.removeClass(this.warnMessage, 'd-none');
+        } else {
+            BX.addClass(this.warnMessage, 'd-none');
             this.sendRequest(inputValue);
         }
     }
@@ -45,10 +46,10 @@ export class Geoipform {
     }
 
     onSuccess(data) {
-        console.log(data);
+        BX.addClass(this.errorMessage, 'd-none');
     }
 
     onFail() {
-        BX.removeClass(this.warnMessage, 'd-none');
+        BX.removeClass(this.errorMessage, 'd-none');
     }
 }
