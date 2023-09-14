@@ -8,7 +8,7 @@ this.BX = this.BX || {};
         babelHelpers.classCallCheck(this, Geoipform);
         this.form = BX('geoip-form');
         this.input = BX('geoip-form-input');
-        this.ipRegexp = '^((25[0-5]|(2[0-4]|1\\d|[1-9]|)\\d)\\.?\\b){4}$';
+        this.ipRegexp = new RegExp('^((25[0-5]|(2[0-4]|1\\d|[1-9]|)\\d)\\.?\\b){4}$');
         this.warnMessage = this.form.querySelector('div.warn-message');
         this.initHandlers();
       }
@@ -22,10 +22,10 @@ this.BX = this.BX || {};
         value: function processFormSubmit(event) {
           event.preventDefault();
           var inputValue = this.input.value;
-          if (!inputValue.match(this.ipRegexp)) {
-            BX.removeClass(this.warnMessage, 'd-none');
-          } else {
+          if (!this.ipRegexp.test(inputValue)) {
             BX.addClass(this.warnMessage, 'd-none');
+          } else {
+            BX.removeClass(this.warnMessage, 'd-none');
             this.sendRequest(inputValue);
           }
         }
