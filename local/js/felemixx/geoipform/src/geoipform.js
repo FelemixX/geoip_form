@@ -2,6 +2,7 @@ export class Geoipform {
     constructor() {
         this.form = BX('geoip-form');
         this.input = BX('geoip-form-input');
+        this.table = BX('geoip-result-table');
         this.ipRegexp = new RegExp('^((25[0-5]|(2[0-4]|1\\d|[1-9]|)\\d)\\.?\\b){4}$');
         this.warnMessage = this.form.querySelector('div.warn-message');
         this.errorMessage = this.form.querySelector('div.error-message');
@@ -47,6 +48,7 @@ export class Geoipform {
 
     onSuccess(data) {
         BX.addClass(this.errorMessage, 'd-none');
+        this.table.innerHTML = data;
     }
 
     onFail() {

@@ -9,6 +9,8 @@ use \Bitrix\Main\Engine\Contract\Controllerable;
 
 class GeoIpForm extends CBitrixComponent implements Controllerable
 {
+    protected const CACHING_TIME = 3600;
+
     public function configureActions()
     {
         return [
@@ -22,34 +24,55 @@ class GeoIpForm extends CBitrixComponent implements Controllerable
     {
         $responseFieldName = Loc::getMessage('RESPONSE_FIELD');
         $responseValueFieldName = Loc::getMessage('RESPONSE_FIELD_VALUE');
-        $decodedData = json_decode($data['UF_API_RESPONSE'], true); //TODO
         //ip, country_code, region_name, country_name
-        $html = <<<HTML
-        <table class="mt-2 table">
+        $html = "<table class=\"mt-2 table\">
             <thead>
                 <tr>
-                    <th scope="col">$responseFieldName</th>
-                    <th scope="col">$responseValueFieldName</th>
+                    <th scope=\"col\">$responseFieldName</th>
+                    <th scope=\"col\">$responseValueFieldName</th>
                 </tr>
             </thead>
-            <tbody>
-                <tr>
-                    <td>Mark</td>
-                    <td>Otto</td>
-                </tr>
-            </tbody>
-        </table>
-        HTML;
+            <tbody>";
+        foreach ($data as $key => $value) {
+            if (is_null($value)) {
+                continue;
+            }
+
+            if (is_array($value)) {
+                foreach ($value as $valueKey => $values) {
+                    if (is_null($values)) {
+                        continue;
+                    }
+
+                    $html .= "<tr>";
+                    $html .= "<td>$valueKey</td>";
+                    $html .= "<td>$values</td>";
+                    $html .= "</tr>";
+                }
+            } else {
+                $html .= "<tr>";
+                $html .= "<td>$key</td>";
+                $html .= "<td>$value</td>";
+                $html .= "</tr>";
+            }
+        }
+        $html .= "</tbody>
+        </table>";
 
         return $html;
     }
 
     public function processFormDataAction(string $userIp): array
     {
+        if (!check_bitrix_sessid()) {
+            throw new \Exception('Session probably expired');
+        }
+
         $result = [
             'success' => false,
             'message' => 'Something went wrong'
         ];
+
         try {
             $userIp = htmlspecialchars(trim($userIp));
 
@@ -58,28 +81,28 @@ class GeoIpForm extends CBitrixComponent implements Controllerable
             }
 
             if (static::checkIfExists($userIp)) {
-                $info = static::getInfoByIp($userIp);
-                $result = [
+                $query = static::getInfoByIp($userIp);
+                $info = json_decode($query['UF_API_RESPONSE'], true);
+                return [
                     'success' => true,
                     'html' => static::createResponseTable($info),
                 ];
-
-                return $result;
             }
 
             $requestData = \Felemixx\Common\Api\IpStack::getByIp($userIp);
-            if (!$requestData) {
+            if (!$requestData || in_array('error', $requestData)) {
                 return $result;
             }
 
-            $decoded = json_decode($requestData, true);
-            if (in_array('error', $decoded)) {
-                return $result;
-            }
+            GeoIpSearchForm::insert([
+                'UF_IP_ADDRESS' => htmlspecialcharsbx($userIp),
+                'UF_API_RESPONSE' => json_encode($requestData),
+                'UF_SERVICE_NAME' => \Felemixx\Common\Api\IpStack::API_SERVICE_NAME,
+            ]);
 
-            $result = [
+            return [
                 'success' => true,
-                'html' => static::createResponseTable($decoded),
+                'html' => static::createResponseTable($requestData),
             ];
         } catch (\Throwable $exception) {
             Logger::addLog($exception);
@@ -100,10 +123,10 @@ class GeoIpForm extends CBitrixComponent implements Controllerable
                     '=UF_IP_ADDRESS' => $userIp,
                 ],
                 'limit' => 1,
-                'runtime' => [
-                    new ORM\Fields\ExpressionField('CNT', 'COUNT(*)')
-                ],
-                "cache" => ["ttl" => 3600],
+                'count_total' => true,
+                'cache' => [
+                    'ttl' => static::CACHING_TIME]
+                ,
             ]
         );
 

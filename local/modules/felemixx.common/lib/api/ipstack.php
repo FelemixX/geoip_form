@@ -8,6 +8,8 @@ class IpStack
     protected const API_KEY = '1cbaacd5d9562f45f01ce69a39e91226';
     protected const IP_REGEXP = '/^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.?\b){4}$/';
 
+    public const API_SERVICE_NAME = 'ipstack';
+
     public static function getByIp (string $ip): array
     {
         $data = static::makeRequest($ip);
