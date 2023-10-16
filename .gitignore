@@ -1,2 +1,5 @@
 /bitrix/
 /upload/
+test*.*
+/.idea/
+*.log
